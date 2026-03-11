@@ -62,9 +62,9 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-[#416252] text-[#416252] w-full flex items-center justify-center pt-10 gap-5">
+    <div className="bg-[#416252] text-[#416252] w-full flex items-center justify-center py-10 px-5 gap-5">
       <div className="bg-[#FFF3D6] w-fit p-10 rounded-lg shadow-lg">
-        <h1 className="text-md md:text-[1.5rem] font-semibold">Suggest me a place to visit in Viet-Nam!</h1>
+        <h1 className="text-md md:text-[1.5rem] font-semibold">Suggest me a place to visit in Viet Nam!</h1>
         <h2 className="text-sm">(Specifically Ho Chi Minh City)</h2>
 
         <form className="pt-5 flex flex-col gap-3">
