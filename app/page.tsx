@@ -165,7 +165,7 @@ export default function Home() {
             />
           </div>
 
-          <button type="submit" onClick={handleSubmit} className='bg-[#416252] text-[#FFF3D6] py-3 rounded-lg shadow-2xl hover:bg-[#547D69] transition cursor-pointer'>
+          <button type="submit" onClick={handleSubmit} className='bg-[#416252] text-[#FFF3D6] w-full py-3 rounded-lg shadow-2xl hover:bg-[#547D69] transition cursor-pointer'>
             Submit Suggestion
           </button>
         </form>
