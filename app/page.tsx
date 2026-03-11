@@ -1,65 +1,179 @@
-import Image from "next/image";
+"use client"
+
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
+import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import clsx from 'clsx'
+
+type selectionType = {
+  id: number,
+  type: string
+}
+
+const selections: selectionType[] = [
+  {id: 1, type: "Attraction / Sight"},
+  {id: 2, type: "Food / Restaurant"},
+  {id: 3, type: "Hotel / Stay"},
+  {id: 4, type: "Activity / Experience"},
+  {id: 5, type: "Other"},
+]
 
 export default function Home() {
+  const [selected, setSelected] = useState(selections[0]);
+  const [formData, setFormData] = useState({
+    placeName: "",
+    category: "",
+    city: "",
+    mediaLink: "",
+    person: "",
+    notes: ""
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
+
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    console.log(formData)
+    try{
+      const response = await fetch('api/insert_data', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) throw new Error('Failed to submit')
+
+      setFormData({
+        placeName: "",
+        category: "",
+        city: "",
+        mediaLink: "",
+        person: "",
+        notes: ""
+      })
+    } catch (error: any){
+      console.error(error)
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="bg-[#416252] text-[#416252] w-full flex items-center justify-center pt-10 gap-5">
+      <div className="bg-[#FFF3D6] w-fit p-10 rounded-lg shadow-lg">
+        <h1 className="text-md md:text-[1.5rem] font-semibold">Suggest me a place to visit in Viet-Nam!</h1>
+        <h2 className="text-sm">(Specifically Ho Chi Minh City)</h2>
+
+        <form className="pt-5 flex flex-col gap-3">
+          <div>
+            <h1 className="text-sm">PLACE NAME:</h1>
+            <input 
+              name="placeName" 
+              className="bg-white w-full p-2 drop-shadow"
+              value={formData.placeName}
+              placeholder="e.g. McDonald's"
+              onChange={handleChange}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+          
+          <div className='grid grid-rows-2 md:grid-cols-2 gap-3'>
+            <div className='flex-1 min-w-0'>
+              <h1>CITY:</h1>
+              <input 
+                name="city"
+                className='w-full bg-white p-2' 
+                placeholder="Ho Chi Minh City"
+                value={formData.city}
+                onChange={handleChange}
+              />
+            </div>
+            
+            <div className='flex-1 min-w-0 w-full'>
+              <h1 className='text-sm'>CATEGORY:</h1>
+              <div className='w-full'>
+                <Listbox value={selected} onChange={(val) => {
+                setSelected(val)
+                setFormData(prev => ({...prev, category: val.type}))
+              }}>
+                <ListboxButton
+                  className={clsx(
+                    "flex gap-4 bg-white w-full text-left p-2 drop-shadow rounded-lg focus:outline-none transition duration-100 ease-in data-leave:data-closed:opacity-0"
+                  )}
+                >
+                  {selected.type}
+                  <ChevronDownIcon
+                    className="group pointer-events-none absolute top-2.5 right-2.5 size-4 fill-white/60"
+                    aria-hidden="true"
+                  />
+                </ListboxButton>
+                <ListboxOptions
+                  anchor="bottom"
+                  transition
+                  className={clsx(
+                    "flex flex-col gap-2 bg-white p-2 rounded-lg w-(--button-width) [--anchor-gap:--spacing(1)]"
+                  )}
+                >
+                  {selections.map((selection) => (
+                    <ListboxOption
+                      key={selection.type}
+                      value={selection}
+                      className="group flex cursor-default items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-gray-200"
+                    >
+                      <CheckIcon className="invisible size-4 fill-white group-data-selected:visible" />
+                      <div className="text-sm/6 text-[#416252]">{selection.type}</div>
+                    </ListboxOption>
+                  ))}
+                </ListboxOptions>
+              </Listbox>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h1 className="text-sm">SOCIAL MEDIA LINK:</h1>
+            <input 
+              name="mediaLink" 
+              className="bg-white w-full p-2 drop-shadow" 
+              placeholder='e.g. TikTok, Instagram'
+              value={formData.mediaLink}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <h1 className="text-sm">PERSON SUBMITTING:</h1>
+            <input 
+              name="person" 
+              className="bg-white w-full p-2 drop-shadow" 
+              placeholder='Your name'
+              value={formData.person}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <h1 className="text-sm">NOTES</h1>
+            <textarea 
+              name="notes" 
+              className="bg-white w-full p-2 drop-shadow resize-y max-h-50" 
+              placeholder='Opening hours, tips, why do you want to go...'
+              value={formData.notes}
+              onChange={handleChange}
+            />
+          </div>
+
+          <button type="submit" onClick={handleSubmit} className='bg-[#416252] text-[#FFF3D6] py-3 rounded-lg shadow-2xl hover:bg-[#547D69] transition cursor-pointer'>
+            Submit Suggestion
+          </button>
+        </form>
+      </div>
+
+      {/* <div className='text-[#FFF3D6] bg-[#344E41] w-fit p-10 rounded-lg'>
+        <h1 className='text-[1.5rem]'>Current Suggestions</h1>
+      </div> */}
     </div>
   );
 }
