@@ -79,9 +79,9 @@ export default function Home() {
             />
           </div>
           
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-3 items-center'>
             <div className='flex-1 min-w-0'>
-              <h1>CITY:</h1>
+              <h1 className='text-sm'>CITY:</h1>
               <input 
                 name="city"
                 className='w-full bg-white p-2' 
@@ -158,7 +158,7 @@ export default function Home() {
             <h1 className="text-sm">NOTES</h1>
             <textarea 
               name="notes" 
-              className="bg-white w-full p-2 drop-shadow resize-y max-h-50" 
+              className="bg-white w-full p-2 drop-shadow resize-y max-h-50 min-h-fit" 
               placeholder='Opening hours, tips, why do you want to go...'
               value={formData.notes}
               onChange={handleChange}
@@ -169,6 +169,9 @@ export default function Home() {
             Submit Suggestion
           </button>
         </form>
+        <button className='w-full border p-3 rounded-lg mt-3'>
+          Clear Fields
+        </button>
       </div>
 
       {/* <div className='text-[#FFF3D6] bg-[#344E41] w-fit p-10 rounded-lg'>
