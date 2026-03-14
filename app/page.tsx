@@ -4,6 +4,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headless
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import clsx from 'clsx'
+import Current from './components/currents';
 
 type selectionType = {
   id: number,
@@ -19,10 +20,10 @@ const selections: selectionType[] = [
 ]
 
 export default function Home() {
-  const [selected, setSelected] = useState(selections[0]);
+  const [selected, setSelected] = useState(selections[1].type);
   const [formData, setFormData] = useState({
     placeName: "",
-    category: "",
+    category: selections[2].type,
     city: "",
     mediaLink: "",
     person: "",
@@ -36,9 +37,24 @@ export default function Home() {
     }))
   }
 
+  const handleClear = () => {
+    setFormData({
+      placeName: "",
+      category: selections[2].type,
+      city: "",
+      mediaLink: "",
+      person: "",
+      notes: ""
+    })
+  }
+
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log(formData)
+    // console.log(formData)
+    if (!formData.placeName || !formData.city || !formData.person) {
+      alert("Please fill in all required fields")
+      return
+    }
     try{
       const response = await fetch('api/insert_data', {
         method: "POST",
@@ -62,7 +78,7 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-[#416252] text-[#416252] w-full flex items-center justify-center py-10 px-5 gap-5">
+    <div className="bg-[#416252] text-[#416252] w-full flex flex-col items-center justify-center py-10 px-5 gap-5">
       <div className="bg-[#FFF3D6] w-fit p-10 rounded-lg shadow-lg">
         <h1 className="text-md md:text-[1.5rem] font-semibold">Suggest me a place to visit in Viet Nam!</h1>
         <h2 className="text-sm">(Specifically Ho Chi Minh City)</h2>
@@ -76,6 +92,7 @@ export default function Home() {
               value={formData.placeName}
               placeholder="e.g. McDonald's"
               onChange={handleChange}
+              required
             />
           </div>
           
@@ -84,10 +101,11 @@ export default function Home() {
               <h1 className='text-sm'>CITY:</h1>
               <input 
                 name="city"
-                className='w-full bg-white p-2' 
+                className='w-full bg-white p-2 drop-shadow' 
                 placeholder="Ho Chi Minh City"
                 value={formData.city}
                 onChange={handleChange}
+                required
               />
             </div>
             
@@ -96,14 +114,14 @@ export default function Home() {
               <div className='w-full'>
                 <Listbox value={selected} onChange={(val) => {
                 setSelected(val)
-                setFormData(prev => ({...prev, category: val.type}))
+                setFormData(prev => ({...prev, category: val}))
               }}>
                 <ListboxButton
                   className={clsx(
                     "flex gap-4 bg-white w-full text-left p-2 drop-shadow rounded-lg focus:outline-none transition duration-100 ease-in data-leave:data-closed:opacity-0"
                   )}
                 >
-                  {selected.type}
+                  {selected}
                   <ChevronDownIcon
                     className="group pointer-events-none absolute top-2.5 right-2.5 size-4 fill-white/60"
                     aria-hidden="true"
@@ -140,6 +158,7 @@ export default function Home() {
               placeholder='e.g. TikTok, Instagram'
               value={formData.mediaLink}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -151,6 +170,7 @@ export default function Home() {
               placeholder='Your name'
               value={formData.person}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -162,21 +182,19 @@ export default function Home() {
               placeholder='Opening hours, tips, why do you want to go...'
               value={formData.notes}
               onChange={handleChange}
+              required
             />
           </div>
 
-          <button type="submit" onClick={handleSubmit} className='bg-[#416252] text-[#FFF3D6] w-full py-3 rounded-lg shadow-2xl hover:bg-[#547D69] transition cursor-pointer'>
+          <button type="submit" onClick={handleSubmit} className='bg-[#416252] text-[#FFF3D6] w-full py-3 rounded-lg shadow-lg hover:bg-[#547D69] transition cursor-pointer'>
             Submit Suggestion
           </button>
         </form>
-        <button className='w-full border p-3 rounded-lg mt-3'>
+        <button onClick={handleClear} className='w-full border p-3 rounded-lg mt-3 shadow-lg cursor-pointer'>
           Clear Fields
         </button>
       </div>
-
-      {/* <div className='text-[#FFF3D6] bg-[#344E41] w-fit p-10 rounded-lg'>
-        <h1 className='text-[1.5rem]'>Current Suggestions</h1>
-      </div> */}
+      <Current/>
     </div>
   );
 }
