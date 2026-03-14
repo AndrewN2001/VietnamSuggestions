@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
+import test from "node:test";
 
 const auth = new google.auth.GoogleAuth({
     credentials: {
@@ -11,13 +12,28 @@ const auth = new google.auth.GoogleAuth({
 
 const sheets = google.sheets({version: 'v4', auth});
 
+const formatLink = (link: string) => {
+    if (link.includes("https://")) return link
+    return `https://${link}`
+}
+
 export async function GET(req: NextRequest){
     try{
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.GOOGLE_SHEET_ID,
             range: 'Sheet1!A2:Z'
         })
-        return NextResponse.json({response: response.data?.values}, {status: 200})
+        
+        const formattedData = response.data.values?.map((row) => ({
+            placeName: row[1],
+            city: row[2],
+            category: row[3],
+            mediaLink: formatLink(row[4]),
+            personSubmitted: row[5],
+            notes: row[6]
+        }))
+        // console.log(formattedData)
+        return NextResponse.json({response: formattedData}, {status: 200})
     } catch (error: any){
         console.error("Google Sheets error", error?.name, error?.message)
         return NextResponse.json({error: "Error fetching photos from database"})
