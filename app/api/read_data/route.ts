@@ -1,16 +1,5 @@
 import { google } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
-import test from "node:test";
-
-const auth = new google.auth.GoogleAuth({
-    credentials: {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, '\n'),
-    },
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-})
-
-const sheets = google.sheets({version: 'v4', auth});
 
 const formatLink = (link: string) => {
     if (link.includes("https://")) return link
@@ -18,6 +7,16 @@ const formatLink = (link: string) => {
 }
 
 export async function GET(req: NextRequest){
+    const auth = new google.auth.GoogleAuth({
+        credentials: {
+            client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+            private_key: (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, '\n'),
+        },
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    })
+
+    const sheets = google.sheets({version: 'v4', auth});
+
     try{
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.GOOGLE_SHEET_ID,

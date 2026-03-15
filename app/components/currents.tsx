@@ -1,11 +1,14 @@
+"use client"
+
 import {
     createColumnHelper,
     flexRender,
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { useReducer, useState, useEffect } from 'react'
+import { useState, useEffect, memo, useMemo } from 'react'
 import { TrashIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon } from '@heroicons/react/24/outline'
 
 type Suggestion = {
     placeName: string,
@@ -17,44 +20,27 @@ type Suggestion = {
 }
 
 const columnHelper = createColumnHelper<Suggestion>()
-const columns = [
-    columnHelper.accessor('placeName', {
-        cell: (info) => info.getValue(),
-        footer: (info) => info.column.id
-    }),
-    columnHelper.accessor('city', {
-        cell: (info) => info.getValue(),
-        footer: (info) => info.column.id
-    }),
-    columnHelper.accessor('category', {
-        cell: (info) => info.getValue(),
-        footer: (info) => info.column.id
-    }),
-    columnHelper.accessor('mediaLink', {
-        // cell: (info) => info.getValue(),
-        cell: (info) => {
-            const link = info.getValue();
-            return(
-                <a href={link} target="_blank" rel="noopener noreferrer" className='text-blue-400 underline'>
-                    Link
-                </a>
-            )
-        },
-        footer: (info) => info.column.id
-    }),
-    columnHelper.accessor('personSubmitted', {
-        cell: (info) => info.getValue(),
-        footer: (info) => info.column.id
-    }),
-    columnHelper.accessor('notes', {
-        cell: (info) => info.getValue(),
-        footer: (info) => info.column.id
-    }),
-]
 
-export default function Current() {
-    const [data, _setData] = useState([])
-    const rerender = useReducer(() => ({}), {})[1]
+const Current = memo(function Current() {
+    const [data, setData] = useState<Suggestion[]>([])
+
+    const columns = useMemo(() => [
+        columnHelper.accessor('placeName', { cell: (info) => info.getValue() }),
+        columnHelper.accessor('city', { cell: (info) => info.getValue() }),
+        columnHelper.accessor('category', { cell: (info) => info.getValue() }),
+        columnHelper.accessor('mediaLink', {
+            cell: (info) => {
+                const link = info.getValue();
+                return (
+                    <a href={link} target="_blank" rel="noopener noreferrer" className='text-blue-400 underline'>
+                        Link
+                    </a>
+                )
+            }
+        }),
+        columnHelper.accessor('personSubmitted', { cell: (info) => info.getValue() }),
+        columnHelper.accessor('notes', { cell: (info) => info.getValue() }),
+    ], [])
 
     const table = useReactTable({
         data,
@@ -72,47 +58,53 @@ export default function Current() {
     }
 
     useEffect(() => {
-        const handleFetchData = async () => {
+        const fetchData = async () => {
             const response = await fetch('api/read_data')
-            const data = await response.json()
-            _setData(data.response)
+            const json = await response.json()
+            setData(json.response ?? [])
         }
-        handleFetchData();
+        fetchData()
     }, [])
 
-    return(
+    const handleDeleteRow = async (rowIndex: number) => {
+        try {
+            console.log(rowIndex + 1)
+        } catch (error: any) {
+            console.error("Error deleting row", error?.name, error?.message)
+        }
+    }
+
+    return (
         <div className='text-[#FFF3D6] bg-[#344E41] shadow-lg w-fit p-10 rounded-lg flex flex-col justify-center gap-5'>
             <div className="flex items-center justify-between gap-5">
-                <div className='flex gap-5'>
-                    <h1 className='text-[1.5rem] font-semibold'>Current Suggestions</h1>
-                    <span className='font-bold bg-[#FFF3D6] shadow-lg text-[#416252] px-3 py-2 rounded-xl'>
-                        {data.length} {data.length > 1 ? "places" : "place"}
-                    </span>
+                <div className='flex gap-5 justify-between w-full'>
+                    <div className='flex gap-5'>
+                        <h1 className='text-[1.5rem] font-semibold'>Current Suggestions</h1>
+                        <span className='font-bold bg-[#FFF3D6] shadow-lg text-[#416252] px-3 py-2 rounded-xl'>
+                            {data.length} {data.length === 1 ? "place" : "places"}
+                        </span>
+                    </div>
+                    <button className='flex items-center gap-2 px-4 border rounded-lg'>
+                        <ArrowPathIcon className='w-5'/>
+                        Refresh
+                    </button>
                 </div>
-                <button className='bg-[#416252] p-2 px-4 shadow-lg rounded-lg hover:bg-[#547D69] transition cursor-pointer'>
-                    Download as Excel File (.csv)
-                </button>
             </div>
-            
+
             <div>
                 <table className='w-full'>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className='border-b'>
-                                <th>
-                                    #
-                                </th>
+                                <th>#</th>
                                 {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder ? null :
-                                            headers[header.id]
-                                        }
+                                    <th key={header.id} className='px-5'>
+                                        {header.isPlaceholder ? null : headers[header.id]}
                                     </th>
                                 ))}
                             </tr>
                         ))}
                     </thead>
-
                     <tbody>
                         {table.getRowModel().rows.map((row) => (
                             <tr key={row.id} className='bg-[#FFF3D6] text-[#416252]'>
@@ -125,7 +117,7 @@ export default function Current() {
                                     </td>
                                 ))}
                                 <td className='border-b px-3 py-2'>
-                                    <button className='cursor-pointer'>
+                                    <button onClick={() => handleDeleteRow(parseInt(row.id))} className='cursor-pointer'>
                                         <TrashIcon className='h-5'/>
                                     </button>
                                 </td>
@@ -134,6 +126,14 @@ export default function Current() {
                     </tbody>
                 </table>
             </div>
+
+            <div className='w-full flex justify-center'>
+                <button className='bg-[#416252] p-2 px-4 shadow-lg rounded-lg hover:bg-[#547D69] transition cursor-pointer'>
+                    Download as Excel File (.csv)
+                </button>
+            </div>
         </div>
     )
-}
+})
+
+export default Current
