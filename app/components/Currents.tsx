@@ -77,14 +77,14 @@ const Current = memo(function Current() {
     return (
         <div className='text-[#FFF3D6] bg-[#344E41] shadow-lg w-full sm:w-fit p-10 rounded-lg flex flex-col justify-center gap-5'>
             <div className="flex items-center justify-between gap-5">
-                <div className='flex flex-col sm:flex-row gap-2 sm:gap-5 justify-between'>
+                <div className='flex flex-col sm:flex-row gap-2 sm:gap-5 w-full justify-between'>
                     <div className='flex sm:flex-row flex-col gap-2 sm:gap-5'>
                         <h1 className='text-[1.5rem] font-semibold'>Current Suggestions</h1>
                         <span className='w-fit font-bold bg-[#FFF3D6] shadow-lg text-[#416252] px-3 sm:py-2 py-1 rounded-xl'>
                             {data.length} {data.length === 1 ? "place" : "places"}
                         </span>
                     </div>
-                    <button className='flex items-center gap-2 px-4 border rounded-lg w-fit py-2'>
+                    <button className='flex items-center gap-2 px-4 border rounded-lg w-fit py-2  shadow-lg'>
                         <ArrowPathIcon className='w-5'/>
                         Refresh
                     </button>
@@ -123,7 +123,7 @@ const Current = memo(function Current() {
                     </div>
                     
                 </div>
-                <table className='w-full hidden sm:block'>
+                <table className='w-full hidden sm:block max-h-125'>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className='border-b'>
@@ -138,16 +138,16 @@ const Current = memo(function Current() {
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id} className='bg-[#FFF3D6] text-[#416252]'>
-                                <td className='text-center border-b px-3 py-2'>
+                            <tr key={row.id} className='text-[#FFF3D6] border-b border-[#FFF3D6]/40 last:border-b-0'>
+                                <td className='text-center px-3 py-2'>
                                     {parseInt(row.id) + 1}
                                 </td>
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className='border-b px-3 py-2'>
+                                    <td key={cell.id} className=' px-3 py-2'>
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 ))}
-                                <td className='border-b px-3 py-2'>
+                                <td className=' px-3 py-2'>
                                     <button onClick={() => handleDeleteRow(parseInt(row.id))} className='cursor-pointer'>
                                         <TrashIcon className='h-5'/>
                                     </button>
@@ -159,7 +159,7 @@ const Current = memo(function Current() {
             </div>
 
             <div className='w-full flex justify-center'>
-                <button className='bg-[#416252] w-full sm:w-fit p-2 px-4 shadow-lg rounded-lg hover:bg-[#547D69] transition cursor-pointer'>
+                <button onClick={() => (window.location.href = `https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Vietnam_Trip_Suggestion_List`)} className='bg-[#416252] w-full sm:w-fit p-2 px-4 shadow-lg rounded-lg hover:bg-[#547D69] transition cursor-pointer'>
                     Download as Excel File (.csv)
                 </button>
             </div>
