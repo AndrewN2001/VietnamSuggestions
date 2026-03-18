@@ -75,16 +75,16 @@ const Current = memo(function Current() {
     }
 
     return (
-        <div className='text-[#FFF3D6] bg-[#344E41] shadow-lg w-fit p-10 rounded-lg flex flex-col justify-center gap-5'>
+        <div className='text-[#FFF3D6] bg-[#344E41] shadow-lg w-full sm:w-fit p-10 rounded-lg flex flex-col justify-center gap-5'>
             <div className="flex items-center justify-between gap-5">
-                <div className='flex gap-5 justify-between w-full'>
-                    <div className='flex gap-5'>
+                <div className='flex flex-col sm:flex-row gap-2 sm:gap-5 justify-between'>
+                    <div className='flex sm:flex-row flex-col gap-2 sm:gap-5'>
                         <h1 className='text-[1.5rem] font-semibold'>Current Suggestions</h1>
-                        <span className='font-bold bg-[#FFF3D6] shadow-lg text-[#416252] px-3 py-2 rounded-xl'>
+                        <span className='w-fit font-bold bg-[#FFF3D6] shadow-lg text-[#416252] px-3 sm:py-2 py-1 rounded-xl'>
                             {data.length} {data.length === 1 ? "place" : "places"}
                         </span>
                     </div>
-                    <button className='flex items-center gap-2 px-4 border rounded-lg'>
+                    <button className='flex items-center gap-2 px-4 border rounded-lg w-fit py-2'>
                         <ArrowPathIcon className='w-5'/>
                         Refresh
                     </button>
@@ -92,7 +92,38 @@ const Current = memo(function Current() {
             </div>
 
             <div>
-                <table className='w-full'>
+                <div className='sm:hidden block'>
+                    <div className='flex flex-col gap-2'>
+                        {data.map((suggestion) => (
+                            <div 
+                                key={`${suggestion.placeName}-${suggestion.personSubmitted}`} 
+                                className='bg-[#416252] p-3 rounded-lg'
+                            >
+                                <div>
+                                    <h1 className='font-semibold'>
+                                        {suggestion.placeName}
+                                    </h1>
+                                    <div className='text-[13px]'>
+                                        <h2 className='text-[#FFF3D6]/80'>
+                                            {suggestion.city} · {suggestion.category}
+                                        </h2>
+                                        <h3 className='text-[#FFF3D6]/60'>
+                                            Added by {suggestion.personSubmitted}
+                                        </h3>
+                                        <h4 className='text-[#FFF3D6]/50'>
+                                            {suggestion.notes}
+                                        </h4>
+                                        <a href={suggestion.mediaLink} className='text-[#7dd3b4] underline'>
+                                            Link
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                </div>
+                <table className='w-full hidden sm:block'>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className='border-b'>
@@ -128,7 +159,7 @@ const Current = memo(function Current() {
             </div>
 
             <div className='w-full flex justify-center'>
-                <button className='bg-[#416252] p-2 px-4 shadow-lg rounded-lg hover:bg-[#547D69] transition cursor-pointer'>
+                <button className='bg-[#416252] w-full sm:w-fit p-2 px-4 shadow-lg rounded-lg hover:bg-[#547D69] transition cursor-pointer'>
                     Download as Excel File (.csv)
                 </button>
             </div>
