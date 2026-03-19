@@ -9,6 +9,7 @@ import {
 import { useState, useEffect, memo, useMemo } from 'react'
 import { TrashIcon } from '@heroicons/react/24/outline'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast';
 
 type Suggestion = {
     placeName: string,
@@ -21,7 +22,7 @@ type Suggestion = {
 
 const columnHelper = createColumnHelper<Suggestion>()
 
-const Current = memo(function Current() {
+const Current = memo(function Current({refreshKey}: {refreshKey: number}) {
     const [data, setData] = useState<Suggestion[]>([])
 
     const columns = useMemo(() => [
@@ -64,11 +65,19 @@ const Current = memo(function Current() {
             setData(json.response ?? [])
         }
         fetchData()
-    }, [])
+    }, [refreshKey])
 
     const handleDeleteRow = async (rowIndex: number) => {
         try {
-            console.log(rowIndex + 1)
+            // console.log(rowIndex + 1)
+            const response = await fetch('api/delete_data', {
+                method: "DELETE",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({rowIndex: rowIndex + 1})
+            })
+            if (!response.ok) throw new Error("Failed to delete!")
+            setData(prev => prev.filter((_, i) => i !== rowIndex))
+            toast.success("Suggestion deleted successfully!")
         } catch (error: any) {
             console.error("Error deleting row", error?.name, error?.message)
         }
@@ -84,46 +93,53 @@ const Current = memo(function Current() {
                             {data.length} {data.length === 1 ? "place" : "places"}
                         </span>
                     </div>
-                    <button className='flex items-center gap-2 px-4 border rounded-lg w-fit py-2  shadow-lg'>
-                        <ArrowPathIcon className='w-5'/>
-                        Refresh
-                    </button>
                 </div>
             </div>
 
             <div>
                 <div className='sm:hidden block'>
-                    <div className='flex flex-col gap-2'>
-                        {data.map((suggestion) => (
-                            <div 
-                                key={`${suggestion.placeName}-${suggestion.personSubmitted}`} 
-                                className='bg-[#416252] p-3 rounded-lg'
-                            >
-                                <div>
-                                    <h1 className='font-semibold'>
-                                        {suggestion.placeName}
-                                    </h1>
-                                    <div className='text-[13px]'>
-                                        <h2 className='text-[#FFF3D6]/80'>
-                                            {suggestion.city} · {suggestion.category}
-                                        </h2>
-                                        <h3 className='text-[#FFF3D6]/60'>
-                                            Added by {suggestion.personSubmitted}
-                                        </h3>
-                                        <h4 className='text-[#FFF3D6]/50'>
-                                            {suggestion.notes}
-                                        </h4>
-                                        <a href={suggestion.mediaLink} className='text-[#7dd3b4] underline'>
-                                            Link
-                                        </a>
+                    {data.length > 0 ? (
+                        <div className='flex gap-2'>
+                            {data.map((suggestion) => (
+                                <div 
+                                    key={`${suggestion.placeName}-${suggestion.personSubmitted}`} 
+                                    className='bg-[#416252] p-3 rounded-lg shadow-lg w-full flex justify-between'
+                                >
+                                    <div>
+                                        <h1 className='font-semibold'>
+                                            {suggestion.placeName}
+                                        </h1>
+                                        <div className='text-[13px]'>
+                                            <h2 className='text-[#FFF3D6]/80'>
+                                                {suggestion.city} · {suggestion.category}
+                                            </h2>
+                                            <h3 className='text-[#FFF3D6]/60'>
+                                                Added by {suggestion.personSubmitted}
+                                            </h3>
+                                            <h4 className='text-[#FFF3D6]/50'>
+                                                {suggestion.notes}
+                                            </h4>
+                                            <a href={suggestion.mediaLink} className='text-[#7dd3b4] underline'>
+                                                Link
+                                            </a>
+                                        </div>
                                     </div>
+
+                                    <button onClick={() => handleDeleteRow(parseInt(row.id))} className='cursor-pointer'>
+                                        <TrashIcon className='h-5'/>
+                                    </button>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                    
+                            ))}
+                        </div>
+                    ) : (
+                        <div className='p-10 text-center rounded-lg shadow-lg font-semibold border border-dashed opacity-80'>
+                            No entries found.
+                        </div>
+                    )}
                 </div>
-                <table className='w-full hidden sm:block max-h-125'>
+                
+                    
+                <table className='w-full hidden sm:block max-h-90'>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id} className='border-b'>
@@ -136,25 +152,35 @@ const Current = memo(function Current() {
                             </tr>
                         ))}
                     </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id} className='text-[#FFF3D6] border-b border-[#FFF3D6]/40 last:border-b-0'>
-                                <td className='text-center px-3 py-2'>
-                                    {parseInt(row.id) + 1}
-                                </td>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className=' px-3 py-2'>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {data.length > 0 ? (
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr key={row.id} className='text-[#FFF3D6] border-b border-[#FFF3D6]/40 last:border-b-0'>
+                                    <td className='text-center px-3 py-2'>
+                                        {parseInt(row.id) + 1}
                                     </td>
-                                ))}
-                                <td className=' px-3 py-2'>
-                                    <button onClick={() => handleDeleteRow(parseInt(row.id))} className='cursor-pointer'>
-                                        <TrashIcon className='h-5'/>
-                                    </button>
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td key={cell.id} className=' px-3 py-2'>
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </td>
+                                    ))}
+                                    <td className=' px-3 py-2'>
+                                        <button onClick={() => handleDeleteRow(parseInt(row.id))} className='cursor-pointer'>
+                                            <TrashIcon className='h-5'/>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    ) : (
+                        <tbody className=''>
+                            <tr className=''>
+                                <td colSpan={8} className='text-center py-5 text-[#FFF3D6]/80'>
+                                    No entries available.
                                 </td>
                             </tr>
-                        ))}
-                    </tbody>
+                        </tbody>
+                    )}
                 </table>
             </div>
 

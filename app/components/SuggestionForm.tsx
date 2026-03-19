@@ -19,7 +19,7 @@ const selections: selectionType[] = [
   {id: 5, type: "Other"},
 ]
 
-export default function SuggestionForm(){
+export default function SuggestionForm({onSubmitSuccess}: {onSubmitSuccess? : () => void}){
     const [selected, setSelected] = useState(selections[1].type);
     const [formData, setFormData] = useState({
         placeName: "",
@@ -64,6 +64,7 @@ export default function SuggestionForm(){
 
             if (!response.ok) throw new Error('Failed to submit')
             toast.success('Suggestion submitted successfully!')
+            onSubmitSuccess && onSubmitSuccess()
             setFormData({
                 placeName: "",
                 category: "",
@@ -101,7 +102,7 @@ export default function SuggestionForm(){
                         <input 
                             name="city"
                             className='w-full bg-white p-2 drop-shadow' 
-                            placeholder="Ho Chi Minh City"
+                            placeholder="e.g. Ho Chi Minh City"
                             value={formData.city}
                             onChange={handleChange}
                             required
