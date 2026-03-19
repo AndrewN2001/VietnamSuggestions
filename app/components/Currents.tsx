@@ -33,14 +33,22 @@ const Current = memo(function Current({refreshKey}: {refreshKey: number}) {
             cell: (info) => {
                 const link = info.getValue();
                 return (
-                    <a href={link} target="_blank" rel="noopener noreferrer" className='text-blue-400 underline'>
+                    <a href={link} target="_blank" rel="noopener noreferrer" className='text-[#7dd3b4] underline'>
                         Link
                     </a>
                 )
             }
         }),
         columnHelper.accessor('personSubmitted', { cell: (info) => info.getValue() }),
-        columnHelper.accessor('notes', { cell: (info) => info.getValue() }),
+        columnHelper.accessor('notes', { 
+            cell: (info) => {
+                return(
+                    <span title={info.getValue()} className='block max-w-50 truncate'>
+                        {info.getValue()}
+                    </span>
+                )
+            } 
+        }),
     ], [])
 
     const table = useReactTable({
@@ -99,10 +107,10 @@ const Current = memo(function Current({refreshKey}: {refreshKey: number}) {
             <div>
                 <div className='sm:hidden block'>
                     {data.length > 0 ? (
-                        <div className='flex gap-2'>
-                            {data.map((suggestion) => (
+                        <div className='flex flex-col gap-2 max-h-125 overflow-scroll'>
+                            {data.map((suggestion, index) => (
                                 <div 
-                                    key={`${suggestion.placeName}-${suggestion.personSubmitted}`} 
+                                    key={`${suggestion.placeName}-${suggestion.personSubmitted}-${Math.random() * 1000}`} 
                                     className='bg-[#416252] p-3 rounded-lg shadow-lg w-full flex justify-between'
                                 >
                                     <div>
@@ -116,7 +124,7 @@ const Current = memo(function Current({refreshKey}: {refreshKey: number}) {
                                             <h3 className='text-[#FFF3D6]/60'>
                                                 Added by {suggestion.personSubmitted}
                                             </h3>
-                                            <h4 className='text-[#FFF3D6]/50'>
+                                            <h4 className='text-[#FFF3D6]/50 max-h-50 overflow-y-auto mt-1'>
                                                 {suggestion.notes}
                                             </h4>
                                             <a href={suggestion.mediaLink} className='text-[#7dd3b4] underline'>
@@ -125,7 +133,7 @@ const Current = memo(function Current({refreshKey}: {refreshKey: number}) {
                                         </div>
                                     </div>
 
-                                    <button onClick={() => handleDeleteRow(parseInt(row.id))} className='cursor-pointer'>
+                                    <button onClick={() => handleDeleteRow(index)} className='cursor-pointer'>
                                         <TrashIcon className='h-5'/>
                                     </button>
                                 </div>
